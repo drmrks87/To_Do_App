@@ -3,6 +3,8 @@ from PyQt6.QtWidgets import QApplication, QLabel, QWidget, QGridLayout, \
     QLineEdit, QPushButton, QMainWindow, QTableWidget, QTableWidgetItem, QDialog, \
     QVBoxLayout, QComboBox, QToolBar, QStatusBar, QMessageBox, QCalendarWidget
 from PyQt6.QtGui import QAction, QIcon
+from win10toast import ToastNotifier
+from datetime import datetime
 import sys
 import sqlite3
 
@@ -60,9 +62,6 @@ class MainWindow(QMainWindow):
         toolbar.addAction(search_action)
         toolbar.addAction(edit_action)
         toolbar.addAction(delete_action)
-
-        # Detect a cell click
-        # self.table.cellClicked.connect(self.cell_clicked)
 
     def load_data(self):
         connection = DatabaseConnection().connect()
@@ -162,7 +161,7 @@ class SearchDialog(QDialog):
         name = self.todo_name.text()
         connection = DatabaseConnection().connect()
         cursor = connection.cursor()
-        result = cursor.execute("SELECT * FROM todos WHERE Todo = ?", (name, ))
+        result = cursor.execute("SELECT * FROM todos WHERE Todo = ?", (name,))
         rows = list(result)
         print(rows)
         items = main_window.table.findItems(name, Qt.MatchFlag.MatchFixedString)
@@ -186,7 +185,6 @@ class EditDialog(QDialog):
         # Get To Do from selected row
         index = main_window.table.currentRow()
         todo_name = main_window.table.item(index, 1).text()
-
 
         # Get Id from selected row
         self.todo_id = main_window.table.item(index, 0).text()
@@ -248,9 +246,9 @@ class DeleteDialog(QDialog):
         index = main_window.table.currentRow()
         todo_id = main_window.table.item(index, 0).text()
 
-        connection = DatabaseConnection.connect()
+        connection = DatabaseConnection().connect()
         cursor = connection.cursor()
-        cursor.execute("DELETE FROM todos WHERE id = ?", (todo_id, ))
+        cursor.execute("DELETE FROM todos WHERE Id = ?", (todo_id,))
         connection.commit()
         cursor.close()
         connection.close()
@@ -263,6 +261,7 @@ class DeleteDialog(QDialog):
         confirmation_widget.setText("The record was deleted successfully!")
         confirmation_widget.exec()
 
+
 class AboutDialog(QMessageBox):
     def __init__(self):
         super().__init__()
@@ -272,7 +271,6 @@ class AboutDialog(QMessageBox):
         You can select a date until you want to finish your ToDo.
         '''
         self.setText(content)
-
 
 
 app = QApplication(sys.argv)
